@@ -63,8 +63,28 @@ impl LocalFileSVNServer {
         let mut contents = String::new();
         let mut k = PathBuf::from(self.root_path.clone());
         k.push(".log");
-        k.push(rev.to_string() + ".txt".to_string());
-        
+        k.push(rev.to_string() + ".txt");
+
+        println!("Looking at: {}", k.display());
+        let r_file = File::open(k);
+        let mut file = match r_file {
+            Ok(k)  => {
+                println!("Succesfully opened file fadfaf");
+                k
+            }
+            Err(_) => return Err("FileRead error: ".to_string()),
+        };
+
+        println!("Looking at file");
+        match file.read_to_string(&mut contents) {
+            Ok(j) => println!("Successfully read the file"),
+            Err(_) => {
+                println!("Failed to read from file");
+                return Err("Failed to read from file".to_string())
+            }
+        }
+
+        Ok(contents)
     }
 
     fn cat_k(&self, path: String, rev: u64) -> Result<String, String> {
@@ -187,6 +207,7 @@ mod tests {
         assert!(d.exists());
     }
 
+    #[test]
     fn test_svn_cat() {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push("tests/resources/dev_repo");
@@ -205,8 +226,23 @@ mod tests {
         assert_eq!(rest, "hello world");
     }
 
+    #[test]
     fn test_svn_log() {
-        
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("tests/resources/dev_repo");
+        let s_path = match d.to_str() {
+            Some(T) => T,
+            // want to have a assert false here. 
+            None => "",
+        };
+        // this seems stupid
+        assert_ne!(s_path, "");
+        let local_svn = LocalFileSVNServer::new(s_path);
+        let rest = match local_svn.log("1".to_string(), 1) {
+            Ok(k) => k,
+            Err(_) => "".to_string(),
+        };
+        assert_eq!(rest, "Added hello repo and world file");
     }
 }
 
