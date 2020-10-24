@@ -76,22 +76,9 @@ impl LocalFileSVNServer {
         k.push(rev.to_string() + ".txt");
 
         println!("Looking at: {}", k.display());
-        let r_file = File::open(k);
-        let mut file = match r_file {
-            Ok(k)  => {
-                println!("Succesfully opened file fadfaf");
-                k
-            }
-            Err(_) => return Err("FileRead error: ".to_string()),
-        };
-
-        println!("Looking at file");
-        match file.read_to_string(&mut contents) {
-            Ok(j) => println!("Successfully read the file"),
-            Err(_) => {
-                println!("Failed to read from file");
-                return Err("Failed to read from file".to_string())
-            }
+        match read_from_disk(&k) {
+            Ok(T) => contents = T,
+            Err(_) => return Err(format!("No SVN entry at {}", rev)),
         }
 
         if verbose {
