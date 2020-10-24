@@ -55,7 +55,7 @@ impl LocalFileSVNServer {
         PathBuf::new()
     }
 
-    fn log(&self, path: String, rev: u64) -> Result<String, String> {
+    fn log(&self, path: String, rev: u64, verbose: bool) -> Result<String, String> {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
         // so make full new string and move that in. 
@@ -84,7 +84,23 @@ impl LocalFileSVNServer {
             }
         }
 
-        Ok(contents)
+        if verbose {
+            println!("Verbose logging");
+            Ok(contents)
+        }
+        else {
+            println!("Quite logging");
+            let doc = roxmltree::Document::parse(&*contents).unwrap();
+            use roxmltree::NodeId;
+            let paragraph_node = doc.get_node(NodeId::new(1)).unwrap();
+            match paragraph_node.text() {
+                Some(T) => {
+                    println!("Parsed out the log");
+                    Ok(T.to_string())
+                },
+                None => Err("Failed to retrive text from log".to_string()),
+            }
+        }
     }
 
     fn cat_k(&self, path: String, rev: u64) -> Result<String, String> {
@@ -238,14 +254,34 @@ mod tests {
         // this seems stupid
         assert_ne!(s_path, "");
         let local_svn = LocalFileSVNServer::new(s_path);
-        let rest = match local_svn.log("1".to_string(), 1) {
+        let rest = match local_svn.log("1".to_string(), 1, false) {
+            Ok(k) => k,
+            Err(_) => "".to_string(),
+        };
+
+        // let doc = roxmltree::Document::parse(&*rest).unwrap();
+
+        assert_eq!(rest, "Added hello repo and world file");
+    }
+
+    #[test]
+    fn test_svn_verbose_log() {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("tests/resources/dev_repo");
+        let s_path = match d.to_str() {
+            Some(T) => T,
+            // want to have a assert false here. 
+            None => "",
+        };
+        // this seems stupid
+        assert_ne!(s_path, "");
+        let local_svn = LocalFileSVNServer::new(s_path);
+        let rest = match local_svn.log("1".to_string(), 1, true) {
             Ok(k) => k,
             Err(_) => "".to_string(),
         };
 
         let doc = roxmltree::Document::parse(&*rest).unwrap();
-
-        // assert_eq!(rest, "Added hello repo and world file");
     }
 }
 

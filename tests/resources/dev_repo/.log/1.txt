@@ -1,3 +1,1 @@
-<p>
-Added hello repo and world file
-</p>
+<p>Added hello repo and world file</p>
