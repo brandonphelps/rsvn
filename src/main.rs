@@ -242,7 +242,10 @@ mod tests {
             Ok(k) => k,
             Err(_) => "".to_string(),
         };
-        assert_eq!(rest, "Added hello repo and world file");
+
+        let doc = roxmltree::Document::parse(&*rest).unwrap();
+
+        // assert_eq!(rest, "Added hello repo and world file");
     }
 }
 
