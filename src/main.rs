@@ -46,15 +46,13 @@ struct LocalFileSVNServer {
 
 //fn read_from_disk<T: AsRef<(s: T) -> std::io::Result<String> {
 fn read_from_disk(s: &PathBuf) -> std::io::Result<String> {
-
     // ? means that the return result must be the same as that of the function containing the ?
-    let r_file = File::open(s)?;
+    let mut r_file = File::open(s)?;
     println!("Succesfully read from file {}", s.display());
-
-    Ok(String::new())
+    let mut file_contents = String::new();
+    r_file.read_to_string(&mut file_contents)?;
+    Ok(file_contents)
 }
-    
-
 
 impl LocalFileSVNServer {
     fn new(root_path: &str) -> LocalFileSVNServer {
@@ -239,15 +237,19 @@ mod tests {
     fn test_read_from_disk() {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push("tests/resources/dev_repo/.log/1.txt");
+
         match read_from_disk(&d) {
             Ok(_) => assert!(true),
             Err(_) => assert!(false),
         }
+
         let mut f = PathBuf::from("hello_world");
         // expecting the file to not exist
         match read_from_disk(&f) {
             Ok(_) => assert!(false),
-            Err(_) => assert!(true),
+            Err(T) => {
+                assert!(true)
+            },
         }
     }
 
