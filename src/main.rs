@@ -55,6 +55,18 @@ impl LocalFileSVNServer {
         PathBuf::new()
     }
 
+    fn log(&self, path: String, rev: u64) -> Result<String, String> {
+        let p = PathBuf::from(path);
+        // have to clone because String doesn't implement copy so rust would try to move it.
+        // so make full new string and move that in. 
+
+        let mut contents = String::new();
+        let mut k = PathBuf::from(self.root_path.clone());
+        k.push(".log");
+        k.push(rev.to_string() + ".txt".to_string());
+        
+    }
+
     fn cat_k(&self, path: String, rev: u64) -> Result<String, String> {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
@@ -191,6 +203,10 @@ mod tests {
             Err(_) => "".to_string(),
         };
         assert_eq!(rest, "hello world");
+    }
+
+    fn test_svn_log() {
+        
     }
 }
 
