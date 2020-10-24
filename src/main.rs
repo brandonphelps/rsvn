@@ -59,22 +59,35 @@ impl LocalFileSVNServer {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
         // so make full new string and move that in. 
+
+        let mut contents = String::new();
+
         let mut k = PathBuf::from(self.root_path.clone());
         k.push(rev.to_string());
         k.push(p);
 
+
         println!("Looking at: {}", k.display());
-        
-        let path_string = k.as_path().display().to_string();
+        let r_file = File::open(k);
+        let mut file = match r_file {
+            Ok(k)  => {
+                println!("Succesfully opened file fadfaf");
+                k
+            }
+            Err(_) => return Err("FileRead error: ".to_string()),
+        };
 
-        let file = File::open(k);
-        match file {
-            Ok(k)  => println!("Succesfully opened file"),
-            Err(_) => return Err(format!("FileRead error: {}", path_string)),
+        println!("Looking at file");
+        match file.read_to_string(&mut contents) {
+            Ok(j) => println!("Successfully read the file"),
+            Err(_) => {
+                println!("Failed to read from file");
+                return Err("Failed to read from file".to_string())
+            }
         }
-        Ok("Hello world".to_string())
-    }
 
+        Ok(contents)
+    }
 
 }
 
@@ -104,17 +117,33 @@ impl SVNSource for LocalFileSVNServer {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
         // so make full new string and move that in. 
+
+        let mut contents = String::new();
+
         let mut k = PathBuf::from(self.root_path.clone());
         k.push(p);
         k.push(rev.to_string());
 
         println!("Looking at: {}", k.display());
-        let file = File::open(k);
-        match file {
-            Ok(k)  => println!("Succesfully opened file"),
+        let r_file = File::open(k);
+        let mut file = match r_file {
+            Ok(k)  => {
+                println!("Succesfully opened file fadfaf");
+                k
+            }
             Err(_) => return Err("FileRead error: "),
+        };
+
+        println!("Looking at file");
+        match file.read_to_string(&mut contents) {
+            Ok(j) => println!("Successfully read the file"),
+            Err(_) => {
+                println!("Failed to read from file");
+                return Err("Failed to read from file")
+            }
         }
-        Ok("Hello world".to_string())
+
+        Ok(contents)
     }
 
     // Static return
@@ -122,6 +151,47 @@ impl SVNSource for LocalFileSVNServer {
         "Hello World"
     }
 
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[cfg(test)]
+mod tests {
+    // pulls in names from outer
+    use super::*;
+    
+    #[test]
+    fn test_add() {
+        assert_eq!(add(1, 2), 3);
+    }
+
+    #[test]
+    fn test_file() {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("tests/resources/dev_repo");
+
+        assert!(d.exists());
+    }
+
+    fn test_svn_cat() {
+        let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        d.push("tests/resources/dev_repo");
+        let s_path = match d.to_str() {
+            Some(T) => T,
+            // want to have a assert false here. 
+            None => "",
+        };
+        // this seems stupid
+        assert_ne!(s_path, "");
+        let local_svn = LocalFileSVNServer::new(s_path);
+        let rest = match local_svn.cat_k("hello/world.txt".to_string(), 1) {
+            Ok(k) => k,
+            Err(_) => "".to_string(),
+        };
+        assert_eq!(rest, "hello world");
+    }
 }
 
 
@@ -146,10 +216,10 @@ fn main() {
     println!("cat: {}", m.cat("hello world".to_string()));
     println!("cat: {}", m.cat_s());
 
-    
+    println!("Hell owrold rfjeklqjreklqjr");
 
     match l.cat_k("hello.txt".to_string(), 1) {
-        Ok(_) => println!("Unlock"),
+        Ok(f) => println!("{}", f),
         Err(e) => println!("Reading file error: {}", e),
     }
 
