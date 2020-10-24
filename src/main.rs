@@ -61,10 +61,6 @@ impl LocalFileSVNServer {
         }
     }
 
-    fn construct_path(path: String, rev: u64) -> PathBuf {
-        PathBuf::new()
-    }
-
     fn log(&self, path: String, rev: u64, verbose: bool) -> Result<String, String> {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
@@ -78,9 +74,10 @@ impl LocalFileSVNServer {
         println!("Looking at: {}", k.display());
         match read_from_disk(&k) {
             Ok(T) => contents = T,
-            Err(_) => return Err(format!("No SVN entry at {}", rev)),
+            Err(_) => return Err(format!("No SVN entry at {}",  rev)),
         }
 
+        // if verbose get full contents. 
         if verbose {
             println!("Verbose logging");
             Ok(contents)
@@ -100,87 +97,23 @@ impl LocalFileSVNServer {
         }
     }
 
-    fn cat_k(&self, path: String, rev: u64) -> Result<String, String> {
+    fn cat(&self, path: String, rev: u64) -> Result<String, String> {
         let p = PathBuf::from(path);
         // have to clone because String doesn't implement copy so rust would try to move it.
         // so make full new string and move that in. 
-
         let mut contents = String::new();
-
         let mut k = PathBuf::from(self.root_path.clone());
         k.push(rev.to_string());
         k.push(p);
-
         match read_from_disk(&k) {
             Ok(T) => contents = T,
-            Err(_) => return Err(format!("No SVN entry at {}", rev)),
+            Err(_) => return Err(format!("No SVN entry {}", rev)),
         }
         Ok(contents)
     }
 
 }
 
-impl SVNSource for MockSVNServer {
-    // returns a new instance? 
-    fn cat(&self, a: String ) -> String {
-        let s = a + &" Hello World".to_string();
-        s
-    }
-    fn cat_r(&self, path: String, rev: u64) -> Result<String, &'static str> {
-        Err("Hello world")
-    }
-
-    // Static return
-    fn cat_s(&self) -> &'static str {
-        "Hello World"
-    }
-}
-
-impl SVNSource for LocalFileSVNServer {
-    // returns a new instance? 
-    fn cat(&self, a: String ) -> String {
-        "hello world".to_string()
-    }
-
-    fn cat_r(&self, path: String, rev: u64) -> Result<String, &'static str> {
-        let p = PathBuf::from(path);
-        // have to clone because String doesn't implement copy so rust would try to move it.
-        // so make full new string and move that in. 
-
-        let mut contents = String::new();
-
-        let mut k = PathBuf::from(self.root_path.clone());
-        k.push(p);
-        k.push(rev.to_string());
-
-        println!("Looking at: {}", k.display());
-        let r_file = File::open(k);
-        let mut file = match r_file {
-            Ok(k)  => {
-                println!("Succesfully opened file fadfaf");
-                k
-            }
-            Err(_) => return Err("FileRead error: "),
-        };
-
-        println!("Looking at file");
-        match file.read_to_string(&mut contents) {
-            Ok(j) => println!("Successfully read the file"),
-            Err(_) => {
-                println!("Failed to read from file");
-                return Err("Failed to read from file")
-            }
-        }
-
-        Ok(contents)
-    }
-
-    // Static return
-    fn cat_s(&self) -> &'static str {
-        "Hello World"
-    }
-
-}
 
 fn add(a: i32, b: i32) -> i32 {
     a + b
@@ -236,7 +169,7 @@ mod tests {
         // this seems stupid
         assert_ne!(s_path, "");
         let local_svn = LocalFileSVNServer::new(s_path);
-        let rest = match local_svn.cat_k("hello/world.txt".to_string(), 1) {
+        let rest = match local_svn.cat("hello/world.txt".to_string(), 1) {
             Ok(k) => k,
             Err(_) => "".to_string(),
         };
@@ -303,14 +236,14 @@ fn main() {
         println!("Duck: {}", d.show());
     }
 
-    let m = MockSVNServer();
     let l = LocalFileSVNServer::new(r"C:\Users\Brandon\Desktop\rust\testing");
-    println!("cat: {}", m.cat("hello world".to_string()));
-    println!("cat: {}", m.cat_s());
+    // let m = MockSVNServer();
+    // println!("cat: {}", m.cat("hello world".to_string()));
+    // println!("cat: {}", m.cat_s());
 
     println!("Hell owrold rfjeklqjreklqjr");
 
-    match l.cat_k("hello.txt".to_string(), 1) {
+    match l.cat("hello.txt".to_string(), 1) {
         Ok(f) => println!("{}", f),
         Err(e) => println!("Reading file error: {}", e),
     }
