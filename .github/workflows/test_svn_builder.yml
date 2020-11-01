@@ -30,7 +30,7 @@ jobs:
   svn-job:
     runs-on: ubuntu-latest
     services:
-      image: ${{ jobs.svn-build-job.steps.docker_build.outputs.digest }} 
+      image: ${{ job.svn-build-job.steps.docker_build.outputs.digest }} 
 
     steps:
       - uses: actions/checkout@v2
