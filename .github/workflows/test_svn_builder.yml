@@ -4,14 +4,15 @@ name: SVNBox
 
 on: [push]
 
-services:
-  nginx:
-    image: nginx
-    ports:
-      - 8080:80
 
 
 jobs:
+  services:
+    nginx:
+      image: nginx
+      ports:
+        - 8080:80
+
   build:
     runs-on: ubuntu-latest
 
