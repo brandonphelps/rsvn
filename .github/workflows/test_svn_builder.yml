@@ -45,3 +45,6 @@ jobs:
     
       - name: Run Svn command
         run: svn co svn://localhost:3690/Test Test
+
+
+    needs: [svn-job]
