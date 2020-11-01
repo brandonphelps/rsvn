@@ -26,10 +26,17 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
 
+
   svn-job:
     runs-on: ubuntu-latest
     services:
       image: ${{ jobs.svn-build-job.steps.docker_build.outputs.digest }} 
+
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout code
+
+    needs: [svn-build-job]
 
 
   build:
