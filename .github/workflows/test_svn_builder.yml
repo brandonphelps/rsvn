@@ -33,7 +33,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Spin up container
-        run: docker run -p 3690:3690 ${{ steps.docker_build.outputs.digest }}
+        run: docker run -p 3690:3690 ${{ steps.docker_build.outputs.digest }} &
 
 
   build:
