@@ -7,14 +7,14 @@ on: [push]
 
 
 jobs:
-  services:
-    nginx:
-      image: nginx
-      ports:
-        - 8080:80
-
-  build:
+  svn-job:
     runs-on: ubuntu-latest
+    services:
+      nginx:
+        image: nginx
+        ports:
+          - 8080:80
+
 
     steps:
       - uses: actions/checkout@v2
@@ -31,6 +31,17 @@ jobs:
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Spin up container
+        run: docker run -p 3690:3690 ${{ steps.docker_build.outputs.digest }}
+
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout code
     
       - name: Run Svn command
         run: svn co svn://localhost:3690/Test Test
