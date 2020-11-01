@@ -10,30 +10,13 @@ jobs:
   svn-job:
     runs-on: ubuntu-latest
     services:
-      nginx:
-        image: nginx
-        ports:
-          - 8080:80
-
+      image: elleflorio/svn-server
+      
 
     steps:
       - uses: actions/checkout@v2
         name: Checkout code
         
-      - uses: docker/build-push-action@v2
-        id: docker_build
-        name: Build docker image
-        with:
-          context: ./tests/custom_svn_box
-          file: ./tests/custom_svn_box/Dockerfile
-          push: false
-          tags: rsvn_box
-      -
-        name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Spin up container
-        run: docker run -p 3690:3690 ${{ steps.docker_build.outputs.digest }} &
 
 
   build:
