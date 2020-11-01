@@ -15,9 +15,9 @@ jobs:
       - uses: docker/build-push-action@v2
         id: docker_build
         name: Build docker image
-        context: ./tests/custom_svn_box
-        file: ./tests/custom_svn_box/Dockerfile
         with:
+          context: ./tests/custom_svn_box
+          file: ./tests/custom_svn_box/Dockerfile
           push: false
           tags: rsvn_box
       -
