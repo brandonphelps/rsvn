@@ -23,4 +23,9 @@ jobs:
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Run Server
+        run: docker run -p 3690:3690 ${{ steps.docker_build.outputs.digest }} 
     
+      - name: Run Svn command
+        run: svn co svn://localhost:3690/Test Test
