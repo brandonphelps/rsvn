@@ -1,0 +1,24 @@
+
+
+name: SVNBox
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout code
+        
+      - uses: docker/build-push-action@v2
+        id: docker_build
+        name: Build docker image
+        with:
+          push: false
+          tags: rsvn_box
+      -
+        name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+    
